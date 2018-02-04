@@ -11,7 +11,7 @@ public class BackendClient {
 	Socket clientSocket = null;
 	Scanner input = null;
 	PrintWriter output = null;
-	String inputLine, outputLine;
+	String fromServer;
 	
 	
 	public void disconnect(){
@@ -19,6 +19,7 @@ public class BackendClient {
 			input.close();
 			output.close();
 			clientSocket.close();
+			System.out.println("Client offline");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -39,10 +40,19 @@ public class BackendClient {
 		return true;
 	}
 	
-	public boolean send(JTextArea userToServer) {
+	public boolean send(JTextArea userToServer, JTextArea replyField) {
 		try {
 			if(userToServer != null) {
-				userToServer.write(output);
+				output.println(userToServer.getText());
+				//userToServer.write(output);
+				
+				/*
+				while( input.hasNextLine()) {
+					fromServer = input.nextLine();
+					replyField.setText(replyField.getText() + fromServer);
+				}
+				*/
+				
 				return true;
 			}
 		}catch(Exception err) {
@@ -51,11 +61,19 @@ public class BackendClient {
 		return false;
 	}
 	
-	public boolean send(String isbn, JTextArea userToServer) { //overload for when ther is ISBN
+	public boolean send(String isbn, JTextArea userToServer, JTextArea replyField) { //overload for when ther is ISBN
 		try {
 			if(userToServer != null) {
-				output.println(isbn); //send ISBN
-				userToServer.write(output); //send rest of request
+				output.println(userToServer.getText() + "\nISBN " + isbn); //send ISBN
+				
+				/*
+				while( input.hasNextLine()) {
+					fromServer = input.nextLine();
+					replyField.setText(replyField.getText() + " \n" + fromServer);
+				}
+				*/
+				
+				
 				return true;
 			}
 		}catch(Exception err) {

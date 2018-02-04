@@ -43,7 +43,7 @@ public class ConnectGUIv2 extends JFrame {
 	private JButton sendButton;
 	private JLabel serverReplyLabel;
 	private JCheckBox bibtexCheckBox;
-	private JTextField serverReplyTextField;
+	private JTextArea serverReplyTextField;
 	private JLabel isbnLabel;
 	private JLabel portLabel;
 	private JLabel ipLabel;
@@ -89,12 +89,13 @@ public class ConnectGUIv2 extends JFrame {
 		serverReplyLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		//Initialize text fields
-		isbnTextField = new JTextField();
+		isbnTextField = new JTextField(""); //for checking later cannot be null
 		isbnTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		isbnTextField.setColumns(10);
-		serverReplyTextField = new JTextField();
+		serverReplyTextField = new JTextArea();
 		serverReplyTextField.setEditable(false);
-		serverReplyTextField.setColumns(10);
+		serverReplyTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
+		serverReplyTextField.setLineWrap(true);
 		portTextField = new JTextField();
 		portTextField.setColumns(10);
 		ipTextField = new JTextField();
@@ -145,18 +146,22 @@ public class ConnectGUIv2 extends JFrame {
 		sendButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent send) {
 				//validate ISBN first
-				if(isbnTextField.getText() != "") {
-					if(!isbn13Validate(isbnTextField.getText())){
-						errorLabel.setText("ISBN Invalid!");
-					}else {
-						if(!(c.send(isbnTextField.getText(),requestTextField))) {
+				serverReplyTextField.setText("");
+				if(!isbnTextField.getText().equals("")) {
+					if(isbn13Validate(isbnTextField.getText())){
+						if(!(c.send(isbnTextField.getText(),requestTextField,serverReplyTextField))) {
 							//return says unable to send  
 							errorLabel.setText("Request Not Sent...Error. ");
 						}
+					}else {
+						errorLabel.setText("ISBN Invalid!");
 					}
 				}else {
-					c.send(requestTextField);
+					c.send(requestTextField,serverReplyTextField);
 				}
+				
+				isbnTextField.setText("");
+				requestTextField.setText("");
 			}
 		});
 		
@@ -165,6 +170,14 @@ public class ConnectGUIv2 extends JFrame {
 			public void actionPerformed(ActionEvent disconnect) {
 				//call back end
 				c.disconnect();
+				portTextField.setText("");
+				ipTextField.setText("");
+				isbnTextField.setText("");
+				requestTextField.setText("");
+				serverReplyTextField.setText("");
+				errorLabel.setText("");
+				disconnectButton.setEnabled(false);
+				connectButton.setEnabled(true);
 			}
 		});
 		
@@ -191,25 +204,24 @@ public class ConnectGUIv2 extends JFrame {
 	
 	
 	//for checking ISBN is valid or not, uses 13 digit variation
-	public boolean isbn13Validate(String isbn) {
-		if(isbn==null) {
-			return false;
-		}else if(isbn.length() == 13) {
-			int token,i,checkDigit = 10,total = 0 ,flag = 0; //flag 0 means last multiplied by 1
+	public static boolean isbn13Validate(String isbn) {
+		 if(isbn.length() == 13) {
+			int token,i,checkDigit = 10,total = 0 ,flag = 1; //flag 0 means last multiplied by 1
 			for(i = 0; i<12;i++) {
 				token = Integer.parseInt(isbn.substring(i,i+1));
-				if(i%2 == 0) {
-					if(flag == 0) {
-						total = total + token*1;
-						flag = 1;
-					}else {
-						total = total + (token*3);
-					}
+				if(flag == 1) {
+					total = total + (token*1);
+					flag = 0;
+				}else {
+					total = total + (token*3);
+					flag = 1;
 				}
-				checkDigit = checkDigit - (total%10); if(checkDigit == 10) {checkDigit = 0;}		
-				
 			}
+			checkDigit = checkDigit - (total%10);
+			if(checkDigit == 10) {checkDigit = 0;}		
+			
 			return(checkDigit == Integer.parseInt(isbn.substring(12)));
+			
 		}else {
 			return false;
 		}
