@@ -26,7 +26,7 @@ import java.awt.Component;
  * This GUI is built to provide the client an easy way to connect to the bibliography server
  * Error handling is done on the inputs after connect is pressed. 
  * If failed, client receives a warning
- * This window is resizable, but contents are not.
+ * This window is resizable
  */
 
 @SuppressWarnings("serial")
@@ -142,24 +142,21 @@ public class ConnectGUIv2 extends JFrame {
 			}
 		});
 		
-		
+		//Send button checks ISBN validation if there is one provided, then calls back end send
 		sendButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent send) {
-				//validate ISBN first
+				
+				errorLabel.setText("");
 				serverReplyTextField.setText("");
-				if(!isbnTextField.getText().equals("")) {
+				if(!isbnTextField.getText().equals("")) { //validate ISBN first
 					if(isbn13Validate(isbnTextField.getText())){
-						if(!(c.send(isbnTextField.getText(),requestTextField,serverReplyTextField))) {
-							//return says unable to send  
-							errorLabel.setText("Request Not Sent...Error. ");
-						}
+						c.send(isbnTextField.getText(),requestTextField,serverReplyTextField); 
 					}else {
 						errorLabel.setText("ISBN Invalid!");
 					}
 				}else {
 					c.send(requestTextField,serverReplyTextField);
 				}
-				
 				isbnTextField.setText("");
 				requestTextField.setText("");
 			}
@@ -177,6 +174,7 @@ public class ConnectGUIv2 extends JFrame {
 				serverReplyTextField.setText("");
 				errorLabel.setText("");
 				disconnectButton.setEnabled(false);
+				sendButton.setEnabled(false);
 				connectButton.setEnabled(true);
 			}
 		});
