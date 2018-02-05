@@ -30,8 +30,11 @@ public class RequestHandler implements Runnable {
 		        	inputLine.replaceAll("A-Za-z0-9 ]",  "");
 		        	System.out.println("Received Message from " + Thread.currentThread().getName() + " : " + inputLine);
 		        	out.write("You entered : " + inputLine + "\n");
-		        	out.flush();
+		        out.write("Done.");
+				out.flush();
+				out.close();
 		        }
+			
 //	        }
 		} catch (IOException e) {
 			System.out.println("I/O exception " + e);
